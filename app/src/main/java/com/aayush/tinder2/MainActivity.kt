@@ -14,8 +14,11 @@ import java.io.BufferedInputStream
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
 import android.os.AsyncTask
+import android.widget.ImageView
 import android.widget.TextView
+import com.bumptech.glide.Glide
 import org.json.JSONArray
+import ru.noties.markwon.Markwon
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.*
@@ -78,8 +81,11 @@ class MainActivity : AppCompatActivity() {
             layout.findViewById<TextView>(R.id.name).text = "${data.getString("firstName")} ${data.getString("lastName")}"
             layout.findViewById<TextView>(R.id.email).text = "Contact at ${data.getString("email")}"
             layout.findViewById<TextView>(R.id.company).text = "Working at ${data.getString("company")} since ${ISO8601toString(data.getString("startDate"))}"
-            layout.findViewById<TextView>(R.id.body).text = data.getString("bio")
+            Markwon.setMarkdown(layout.findViewById<TextView>(R.id.body), data.getString("bio"))
             container?.addView(layout)
+            val imageView = layout.findViewById<ImageView>(R.id.avatar)
+            Glide.with(this@MainActivity).load(data.getString("avatar").replace("\\\\", "")).into(imageView)
+
             return layout
         }
 
