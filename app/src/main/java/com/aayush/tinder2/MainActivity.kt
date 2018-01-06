@@ -1,6 +1,12 @@
 package com.aayush.tinder2
 
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.drawable.AdaptiveIconDrawable
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.view.PagerAdapter
@@ -14,6 +20,9 @@ import java.io.BufferedInputStream
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
 import android.os.AsyncTask
+import android.support.annotation.NonNull
+import android.support.v7.graphics.Palette
+import android.support.v7.widget.CardView
 import android.widget.ImageView
 import android.widget.TextView
 import com.bumptech.glide.Glide
@@ -66,6 +75,14 @@ class MainActivity : AppCompatActivity() {
         return SimpleDateFormat("MMM yyyy").format(df.parse(iso8601))
     }
 
+    fun getBitmapFromDrawable(drawable: Drawable): Bitmap {
+        val bmp = Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bmp)
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.draw(canvas)
+        return bmp
+    }
+
     inner class CardPagerAdapter : PagerAdapter() {
         override fun isViewFromObject(view: View?, `object`: Any?): Boolean {
             return view == `object`
@@ -86,6 +103,14 @@ class MainActivity : AppCompatActivity() {
             val imageView = layout.findViewById<ImageView>(R.id.avatar)
             Glide.with(this@MainActivity).load(data.getString("avatar").replace("\\\\", "")).into(imageView)
 
+            if (imageView.drawable != null) {
+                Palette.from(getBitmapFromDrawable(imageView.drawable)).generate(object : Palette.PaletteAsyncListener {
+                    override fun onGenerated(palette: Palette?) {
+                        if (palette != null)
+                            layout.findViewById<CardView>(R.id.container).setCardBackgroundColor(palette.getDarkMutedColor(Color.WHITE))
+                    }
+                })
+            }
             return layout
         }
 
